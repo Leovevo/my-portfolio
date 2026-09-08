@@ -124,7 +124,7 @@ export default function ChatBot() {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <div className="fixed bottom-5 right-5 z-50 font-sans">
       {open && (
@@ -205,6 +205,8 @@ export default function ChatBot() {
               {isLoading ? "..." : "보내기"} {/* 🔥 수정: 통신 중에는 ... 으로 표시 */}
             </button>
           </div> 
+        </div>
+      )}
 
       <button
         type="button"
