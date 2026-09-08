@@ -2,14 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 
-/* ══════════════════════════════════════════════════════════
-   ① 여기만 고치시면 됩니다.
-   ══════════════════════════════════════════════════════════
-   질문(q)과 답변(a)을 한 묶음씩 { } 안에 적고, 쉼표로 이어 주세요.
-   keywords 는 "이런 단어가 들어오면 이 답변을 보여줘" 목록입니다.
-   답변 안에서 줄을 바꾸고 싶으면 \n 을 넣으세요.
-────────────────────────────────────────────────────────── */
-
 type QA = { q: string; a: string; keywords?: string[] };
 
 const QA_LIST: QA[] = [
@@ -42,10 +34,6 @@ const CONFIG = {
   fallback:
     "죄송해요, 그 질문은 제가 아직 답을 못 드려요.\n아래 질문 중에서 골라 주시겠어요?",
 };
-
-/* ══════════════════════════════════════════════════════════
-   아래는 건드리지 않으셔도 됩니다.
-   ══════════════════════════════════════════════════════════ */
 
 type Msg = { text: string; mine: boolean };
 
@@ -83,7 +71,7 @@ export default function ChatBot() {
     { text: CONFIG.greeting, mine: false },
   ]);
   const [draft, setDraft] = useState("");
-  const [isLoading, setIsLoading] = useState(false); //
+  const [isLoading, setIsLoading] = useState(false);
   const logRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -91,7 +79,19 @@ export default function ChatBot() {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [msgs, open]);
 
- const send = async (text: string) => {
+  useEffect(() => {
+    if (open) inputRef.current?.focus();
+  }, [open]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const send = async (text: string) => {
     const t = text.trim();
     if (!t || isLoading) return;
 
@@ -183,11 +183,11 @@ export default function ChatBot() {
             ))}
           </div>
 
-           <div className="flex gap-2 border-t border-gray-700 px-4 py-3">
+          <div className="flex gap-2 border-t border-gray-700 px-4 py-3">
             <input
               ref={inputRef}
               value={draft}
-              disabled={isLoading} // 🔥 추가: 로딩 중 입력 방지
+              disabled={isLoading}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") send(draft);
@@ -199,12 +199,12 @@ export default function ChatBot() {
             <button
               type="button"
               onClick={() => send(draft)}
-              disabled={isLoading} // 🔥 추가: 로딩 중 클릭 방지
+              disabled={isLoading}
               className="rounded-lg bg-blue-500 px-3.5 text-xs font-semibold text-white hover:bg-blue-400 disabled:opacity-50"
             >
-              {isLoading ? "..." : "보내기"} {/* 🔥 수정: 통신 중에는 ... 으로 표시 */}
+              {isLoading ? "..." : "보내기"}
             </button>
-          </div> 
+          </div>
         </div>
       )}
 
