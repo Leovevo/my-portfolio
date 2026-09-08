@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>챗봇 레이아웃 4가지 비교</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.css">
+<style>
+:root{
+  --bg:#111827; --panel:#1f2937; --panel2:#374151;
+  --line:#374151; --line2:#4b5563;
+  --tx:#f9fafb; --tx2:#9ca3af; --tx3:#6b7280;
+  --accent:#3b82f6; --accent2:#60a5fa;
+}
+*{box-sizing:border-box;}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--tx);
+  font-family:Pretendard,-apple-system,'Apple SD Gothic Neo','Malgun Gothic',sans-serif;}
+
+/* ── 레이아웃 전환 바 ── */
+.switch{position:sticky;top:0;z-index:100;display:flex;gap:6px;flex-wrap:wrap;
+  padding:12px 20px;background:rgba(17,24,39,.92);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);}
+.switch span{font-size:12px;color:var(--tx3);align-self:center;margin-right:6px;}
+.switch button{border:1px solid var(--line2);background:transparent;color:var(--tx2);
+  padding:7px 13px;border-radius:999px;font-size:13px;cursor:pointer;font-family:inherit;}
+.switch button:hover{background:var(--panel);color:var(--tx);}
+.switch button.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* ── 가짜 포트폴리오 본문 ── */
+.page{max-width:768px;margin:0 auto;padding:56px 24px 120px;}
+.page h1{font-size:44px;font-weight:800;letter-spacing:-.03em;color:var(--accent2);margin:0;}
+.page .sub{font-size:20px;color:#d1d5db;margin:14px 0 0;}
+.page hr{border:0;border-top:1px solid var(--line);margin:36px 0;}
+.page h2{font-size:15px;color:var(--tx2);font-weight:600;margin:0 0 12px;}
+.page p{line-height:1.8;color:#d1d5db;margin:0 0 14px;}
+.hint{font-size:13px;color:var(--tx3);margin-top:28px;}
+
+/* ── 공통 대화 요소 ── */
+.log{display:flex;flex-direction:column;gap:10px;overflow-y:auto;padding:16px;}
+.msg{max-width:82%;padding:10px 14px;font-size:14px;line-height:1.65;
+  white-space:pre-wrap;word-break:break-word;}
+.bot{align-self:flex-start;background:var(--panel2);color:#f3f4f6;
+  border-radius:16px 16px 16px 4px;}
+.me{align-self:flex-end;background:var(--accent);color:#fff;
+  border-radius:16px 16px 4px 16px;}
+.chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 16px 14px;}
+.chip{border:1px solid var(--line2);background:transparent;color:var(--tx2);
+  padding:7px 12px;border-radius:999px;font-size:12.5px;cursor:pointer;font-family:inherit;}
+.chip:hover{background:var(--panel2);color:var(--tx);}
+.bar{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line);}
+.bar input{flex:1;min-width:0;border:1px solid var(--line2);background:var(--bg);
+  color:var(--tx);border-radius:10px;padding:10px 13px;font-size:14px;font-family:inherit;}
+.bar input::placeholder{color:var(--tx3);}
+.bar input:focus{outline:none;border-color:var(--accent2);}
+.bar button{border:0;background:var(--accent);color:#fff;border-radius:10px;
+  padding:0 15px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
+.head{position:relative;padding:16px 18px;border-bottom:1px solid var(--line);}
+.head h3{margin:0;font-size:15px;font-weight:700;}
+.head p{margin:5px 0 0;font-size:12px;color:var(--tx2);line-height:1.5;}
+.x{position:absolute;top:12px;right:12px;width:28px;height:28px;border:0;background:none;
+  color:var(--tx2);font-size:20px;line-height:1;cursor:pointer;border-radius:8px;}
+.x:hover{background:var(--panel2);color:var(--tx);}
+
+/* ── ① 플로팅 ── */
+#floating{position:fixed;right:22px;bottom:22px;z-index:60;}
+#floating .fab{width:60px;height:60px;border-radius:50%;border:0;background:var(--accent);
+  color:#fff;cursor:pointer;display:grid;place-items:center;
+  box-shadow:0 10px 30px rgba(0,0,0,.45);}
+#floating .fab:hover{background:var(--accent2);}
+#floating .win{position:absolute;right:0;bottom:74px;width:340px;max-height:70vh;
+  display:none;flex-direction:column;background:var(--panel);
+  border:1px solid var(--line);border-radius:18px;overflow:hidden;
+  box-shadow:0 20px 50px rgba(0,0,0,.5);}
+#floating.open .win{display:flex;}
+
+/* ── ② 인라인 섹션 ── */
+#inline{display:none;max-width:768px;margin:0 auto;padding:0 24px 100px;}
+#inline .box{background:var(--panel);border:1px solid var(--line);border-radius:18px;
+  overflow:hidden;display:flex;flex-direction:column;}
+#inline .log{height:280px;}
+
+/* ── ③ 커맨드 팔레트 ── */
+#palette{position:fixed;inset:0;z-index:80;display:none;
+  background:rgba(0,0,0,.6);backdrop-filter:blur(3px);}
+#palette.open{display:block;}
+#palette .win{width:540px;max-width:calc(100vw - 32px);max-height:70vh;
+  margin:12vh auto 0;display:flex;flex-direction:column;background:var(--panel);
+  border:1px solid var(--line2);border-radius:14px;overflow:hidden;
+  box-shadow:0 24px 60px rgba(0,0,0,.6);}
+#palette .top{display:flex;align-items:center;gap:10px;padding:14px 16px;
+  border-bottom:1px solid var(--line);}
+#palette .top input{flex:1;border:0;background:none;color:var(--tx);
+  font-size:16px;font-family:inherit;}
+#palette .top input:focus{outline:none;}
+#palette .top kbd{font-size:11px;color:var(--tx3);border:1px solid var(--line2);
+  border-radius:5px;padding:3px 6px;font-family:ui-monospace,monospace;}
+#palette .log{max-height:300px;}
+.kbd-hint{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:60;
+  display:none;font-size:13px;color:var(--tx2);background:var(--panel);
+  border:1px solid var(--line2);border-radius:999px;padding:9px 18px;cursor:pointer;}
+.kbd-hint kbd{font-family:ui-monospace,monospace;color:var(--tx);}
+
+/* ── ④ 사이드 패널 ── */
+#side{position:fixed;top:0;right:0;bottom:0;width:380px;max-width:88vw;z-index:70;
+  display:flex;flex-direction:column;background:var(--panel);
+  border-left:1px solid var(--line);transform:translateX(100%);
+  transition:transform .28s cubic-bezier(.4,0,.2,1);}
+#side.open{transform:none;}
+#side .log{flex:1;}
+.side-tab{position:fixed;right:0;top:50%;transform:translateY(-50%);z-index:60;display:none;
+  border:1px solid var(--line2);border-right:0;background:var(--panel);color:var(--tx2);
+  border-radius:10px 0 0 10px;padding:16px 9px;font-size:13px;cursor:pointer;
+  writing-mode:vertical-rl;font-family:inherit;letter-spacing:.08em;}
+.side-tab:hover{color:var(--tx);background:var(--panel2);}
+
+@media(max-width:520px){
+  #floating .win{width:calc(100vw - 44px);}
+  .page h1{font-size:32px;}
+}
+</style>
+</head>
+<body>
+
+<div class="switch">
+  <span>레이아웃 바꿔 보기 →</span>
+  <button data-mode="floating" class="on">① 지금 방식</button>
+  <button data-mode="inline">② 페이지 안 섹션</button>
+  <button data-mode="palette">③ 중앙 검색창</button>
+  <button data-mode="side">④ 사이드 패널</button>
+</div>
+
+<div class="page">
+  <h1>Leo Yun</h1>
+  <p class="sub">Future Cloud Security Wannabe</p>
+  <hr>
+  <h2>소개</h2>
+  <p>클라우드 보안을 공부하고 있습니다. AWS와 인프라 보안에 관심이 많고, 배운 것을 직접 만들어 보면서 익히는 편입니다.</p>
+  <p>이 페이지는 레이아웃을 비교해 보기 위한 예시 화면입니다. 위쪽 버튼으로 네 가지 방식을 번갈아 눌러 보세요.</p>
+  <p class="hint" id="hint"></p>
+</div>
+
+<!-- ① 플로팅 -->
+<div id="floating">
+  <div class="win">
+    <div class="head">
+      <h3>무엇이든 물어보세요</h3>
+      <p>아래 질문을 눌러 보시거나, 직접 입력해 주세요.</p>
+      <button class="x" data-close aria-label="닫기">&times;</button>
+    </div>
+    <div class="log" data-log></div>
+    <div class="chips" data-chips></div>
+    <div class="bar">
+      <input placeholder="질문을 입력하세요" data-input>
+      <button data-send>보내기</button>
+    </div>
+  </div>
+  <button class="fab" aria-label="문의 열기">
+    <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.6 8.6 0 0 1-3.8-.9L3 21l1.9-5a8.4 8.4 0 0 1-.9-3.8 8.4 8.4 0 0 1 8.4-9h.6a8.4 8.4 0 0 1 8 8v.3z"/>
+    </svg>
+  </button>
+</div>
+
+<!-- ② 인라인 -->
+<div id="inline">
+  <h2 style="font-size:15px;color:#9ca3af;font-weight:600;margin:0 0 12px;">궁금한 점</h2>
+  <div class="box">
+    <div class="log" data-log></div>
+    <div class="chips" data-chips></div>
+    <div class="bar">
+      <input placeholder="질문을 입력하세요" data-input>
+      <button data-send>보내기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ③ 커맨드 팔레트 -->
+<div id="palette">
+  <div class="win">
+    <div class="top">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#6b7280"
+        stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input placeholder="무엇이든 물어보세요" data-input>
+      <kbd>ESC</kbd>
+    </div>
+    <div class="log" data-log></div>
+    <div class="chips" data-chips></div>
+  </div>
+</div>
+<button class="kbd-hint"><kbd>Ctrl</kbd> + <kbd>K</kbd> 를 눌러 질문하기</button>
+
+<!-- ④ 사이드 패널 -->
+<div id="side">
+  <div class="head">
+    <h3>무엇이든 물어보세요</h3>
+    <p>포트폴리오를 보면서 함께 물어보실 수 있어요.</p>
+    <button class="x" data-close aria-label="닫기">&times;</button>
+  </div>
+  <div class="log" data-log></div>
+  <div class="chips" data-chips></div>
+  <div class="bar">
+    <input placeholder="질문을 입력하세요" data-input>
+    <button data-send>보내기</button>
+  </div>
+</div>
+<button class="side-tab">질문하기</button>
+
+<script>
+const QA = [
+  { q:"어떤 걸 공부하고 있나요?",
+    a:"클라우드 보안을 공부하고 있습니다.\nAWS와 인프라 보안 쪽에 관심이 많아요.",
+    keywords:["공부","전공","관심","분야","보안","클라우드"] },
+  { q:"어떤 기술을 다루나요?",
+    a:"Next.js와 TypeScript로 웹을 만들고 있고,\n리눅스와 네트워크 기초를 함께 익히는 중입니다.",
+    keywords:["기술","스택","스킬","언어","다루","할수있"] },
+  { q:"깃허브를 보고 싶어요",
+    a:"github.com/Leovevo 에서 작업물을 보실 수 있습니다.",
+    keywords:["깃허브","github","포트폴리오","작업물","프로젝트","코드"] },
+  { q:"연락은 어떻게 하나요?",
+    a:"이메일로 연락 주시면 가장 빠릅니다.\nyour@email.com",
+    keywords:["연락","이메일","메일","문의","컨택"] }
+];
+const GREET = "안녕하세요! 자주 묻는 질문을 정리해 두었어요.";
+const MISS  = "죄송해요, 그 질문은 제가 아직 답을 못 드려요.\n아래 질문 중에서 골라 주시겠어요?";
+
+const norm = s => s.toLowerCase().replace(/[\s.,!?~·'"()\-]/g,"");
+function find(t){
+  const n = norm(t); if(!n) return null;
+  for(const it of QA) if(norm(it.q)===n) return it;
+  for(const it of QA){ const q=norm(it.q); if(q.includes(n)||n.includes(q)) return it; }
+  let best=null,bs=0;
+  for(const it of QA){ let s=0;
+    for(const k of it.keywords||[]) if(n.includes(norm(k))) s+=k.length;
+    if(s>bs){bs=s;best=it;} }
+  return bs>=2?best:null;
+}
+
+function setup(root){
+  const log=root.querySelector("[data-log]"), chips=root.querySelector("[data-chips]"),
+        input=root.querySelector("[data-input]"), send=root.querySelector("[data-send]");
+
+  function say(text,mine){
+    const el=document.createElement("div");
+    el.className="msg "+(mine?"me":"bot");
+    log.appendChild(el);
+    if(mine){ el.textContent=text; log.scrollTop=log.scrollHeight; return; }
+    let i=0;
+    (function type(){
+      el.textContent=text.slice(0,++i);
+      log.scrollTop=log.scrollHeight;
+      if(i<text.length) setTimeout(type,14);
+    })();
+  }
+  function go(t){
+    t=t.trim(); if(!t) return;
+    say(t,true); input.value="";
+    const hit=find(t);
+    setTimeout(()=>say(hit?hit.a:MISS,false),260);
+  }
+  QA.forEach(it=>{
+    const b=document.createElement("button");
+    b.className="chip"; b.textContent=it.q;
+    b.onclick=()=>go(it.q);
+    chips.appendChild(b);
+  });
+  input.addEventListener("keydown",e=>{ if(e.key==="Enter") go(input.value); });
+  if(send) send.onclick=()=>go(input.value);
+  root.querySelectorAll("[data-close]").forEach(b=>b.onclick=()=>root.classList.remove("open"));
+  say(GREET,false);
+  return { log, input, reset(){ log.innerHTML=""; say(GREET,false); } };
+}
+
+const F=setup(document.getElementById("floating"));
+const I=setup(document.getElementById("inline"));
+const P=setup(document.getElementById("palette"));
+const S=setup(document.getElementById("side"));
+
+const floating=document.getElementById("floating"),
+      inline=document.getElementById("inline"),
+      palette=document.getElementById("palette"),
+      side=document.getElementById("side"),
+      kbdHint=document.querySelector(".kbd-hint"),
+      sideTab=document.querySelector(".side-tab"),
+      hint=document.getElementById("hint");
+
+floating.querySelector(".fab").onclick=()=>floating.classList.toggle("open");
+palette.onclick=e=>{ if(e.target===palette) palette.classList.remove("open"); };
+kbdHint.onclick=()=>{ palette.classList.add("open"); P.input.focus(); };
+sideTab.onclick=()=>{ side.classList.add("open"); S.input.focus(); };
+
+document.addEventListener("keydown",e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="k"){
+    e.preventDefault();
+    if(current==="palette"){ palette.classList.add("open"); P.input.focus(); }
+  }
+  if(e.key==="Escape"){
+    palette.classList.remove("open");
+    floating.classList.remove("open");
+    side.classList.remove("open");
+  }
+});
+
+const HINTS={
+  floating:"오른쪽 아래 파란 버튼을 눌러 보세요.",
+  inline:"아래로 조금만 내려 보세요. 대화창이 페이지에 박혀 있습니다.",
+  palette:"화면 아래 안내를 누르거나, Ctrl + K 를 눌러 보세요.",
+  side:"오른쪽 가장자리의 '질문하기' 탭을 눌러 보세요."
+};
+let current="floating";
+
+function show(mode){
+  current=mode;
+  [floating,inline,palette,side].forEach(el=>el.classList.remove("open"));
+  floating.style.display = mode==="floating" ? "block":"none";
+  inline.style.display   = mode==="inline"   ? "block":"none";
+  palette.style.display  = mode==="palette"  ? "":"none";
+  kbdHint.style.display  = mode==="palette"  ? "block":"none";
+  side.style.display     = mode==="side"     ? "flex":"none";
+  sideTab.style.display  = mode==="side"     ? "block":"none";
+  hint.textContent=HINTS[mode];
+  [F,I,P,S].forEach(c=>c.reset());
+}
+
+document.querySelectorAll(".switch button").forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll(".switch button").forEach(x=>x.classList.remove("on"));
+    b.classList.add("on");
+    show(b.dataset.mode);
+  };
+});
+show("floating");
+</script>
+</body>
+</html>

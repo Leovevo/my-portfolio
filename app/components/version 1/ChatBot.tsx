@@ -83,7 +83,6 @@ export default function ChatBot() {
     { text: CONFIG.greeting, mine: false },
   ]);
   const [draft, setDraft] = useState("");
-  const [isLoading, setIsLoading] = useState(false); //
   const logRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -91,40 +90,29 @@ export default function ChatBot() {
     if (logRef.current) logRef.current.scrollTop = logRef.current.scrollHeight;
   }, [msgs, open]);
 
- const send = async (text: string) => {
-    const t = text.trim();
-    if (!t || isLoading) return;
+  useEffect(() => {
+    if (open) inputRef.current?.focus();
+  }, [open]);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  const send = (text: string) => {
+    const t = text.trim();
+    if (!t) return;
     setMsgs((m) => [...m, { text: t, mine: true }]);
     setDraft("");
-    setIsLoading(true);
-
-    try {
-      const response = await fetch("https://api.myfortfolio.xyz/sendMessage", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: t }),
-      });
-
-      if (!response.ok) throw new Error(`서버 에러: ${response.status}`);
-
-      const data = await response.json();
-      const aiReply = data.reply || data.response || data.answer || data.message || data.text;
-      
-      if (aiReply) {
-        setMsgs((m) => [...m, { text: aiReply, mine: false }]);
-      } else {
-        throw new Error("답변 텍스트를 찾을 수 없음");
-      }
-    } catch (error) {
-      console.error("[ChatBot] API 호출 실패:", error);
-      const hit = findAnswer(t);
+    const hit = findAnswer(t);
+    setTimeout(() => {
       setMsgs((m) => [...m, { text: hit ? hit.a : CONFIG.fallback, mine: false }]);
-    } finally {
-      setIsLoading(false);
-    }
+    }, 280);
   };
-  
+
   return (
     <div className="fixed bottom-5 right-5 z-50 font-sans">
       {open && (
@@ -183,28 +171,28 @@ export default function ChatBot() {
             ))}
           </div>
 
-           <div className="flex gap-2 border-t border-gray-700 px-4 py-3">
+          <div className="flex gap-2 border-t border-gray-700 px-4 py-3">
             <input
               ref={inputRef}
               value={draft}
-              disabled={isLoading} // 🔥 추가: 로딩 중 입력 방지
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") send(draft);
               }}
               placeholder="질문을 입력하세요"
               aria-label="질문 입력"
-              className="min-w-0 flex-1 rounded-lg border border-gray-600 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-blue-400 focus:outline-none disabled:opacity-50"
+              className="min-w-0 flex-1 rounded-lg border border-gray-600 bg-gray-900 px-3 py-2 text-sm text-white placeholder-gray-500 focus:border-blue-400 focus:outline-none"
             />
             <button
               type="button"
               onClick={() => send(draft)}
-              disabled={isLoading} // 🔥 추가: 로딩 중 클릭 방지
-              className="rounded-lg bg-blue-500 px-3.5 text-xs font-semibold text-white hover:bg-blue-400 disabled:opacity-50"
+              className="rounded-lg bg-blue-500 px-3.5 text-xs font-semibold text-white hover:bg-blue-400"
             >
-              {isLoading ? "..." : "보내기"} {/* 🔥 수정: 통신 중에는 ... 으로 표시 */}
+              보내기
             </button>
-          </div> 
+          </div>
+        </div>
+      )}
 
       <button
         type="button"
