@@ -100,7 +100,7 @@ export default function ChatBot() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("https://api.myfortfolio.xyz/sendMessage", {
+      const response = await fetch("/api/sendMessage", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: t }),
